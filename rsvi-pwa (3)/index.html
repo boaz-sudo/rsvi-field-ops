@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Reliable Solutions VI — Field Ops</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<meta name="theme-color" content="#0E2A3D" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app-shell">
+    <header class="topbar">
+      <h1>Reliable Solutions VI</h1>
+      <p>Field operations</p>
+    </header>
+
+    <main id="main-content"></main>
+
+    <button id="fab" class="hidden" aria-label="Add"></button>
+    <div id="install-banner" class="hidden">
+      <p>Install this app for one-tap access on your phone.</p>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button id="install-btn">Install</button>
+        <button id="install-dismiss">✕</button>
+      </div>
+    </div>
+
+    <nav class="tabbar">
+      <button class="tab-btn active" data-tab="dashboard"></button>
+      <button class="tab-btn" data-tab="visits"></button>
+      <button class="tab-btn" data-tab="clients"></button>
+      <button class="tab-btn" data-tab="reviews"></button>
+    </nav>
+
+    <div id="sheet-container" class="sheet-backdrop hidden"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
