@@ -1,4 +1,4 @@
-const CACHE_NAME = "rsvi-ops-v1";
+const CACHE_NAME = "rsvi-ops-v2";
 const ASSETS = [
   "./",
   "./index.html",

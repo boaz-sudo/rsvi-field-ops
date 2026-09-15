@@ -7,6 +7,7 @@ const ICON = {
   plus: (s=24,c="#fff") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
   x: (s=20,c="currentColor") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>`,
   trash: (s=15,c="currentColor") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><path d="M6 7l1 14h10l1-14"/><path d="M9 7V4h6v3"/></svg>`,
+  edit: (s=15,c="currentColor") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`,
   calendar: (s=12,c="currentColor") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>`,
   camera: (s=13,c="currentColor") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.3"/></svg>`,
   wifi: (s=13,c="currentColor") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a12 12 0 0 1 16 0"/><path d="M7.5 12.8a7.5 7.5 0 0 1 9 0"/><path d="M10.5 16.5a3.2 3.2 0 0 1 3 0"/><circle cx="12" cy="19.5" r="0.6" fill="${c}"/></svg>`,
@@ -176,9 +177,13 @@ function renderVisits() {
     <div class="card" data-visit="${v.id}">
       <div class="card-row">
         <div><p class="card-title">${esc(v.clientName)}</p><p class="card-sub">${esc(v.service)}</p></div>
-        <button class="icon-btn" data-action="delete-visit" data-id="${v.id}">${ICON.trash(15, COLORS.slate)}</button>
+        <div style="display:flex;gap:10px">
+          <button class="icon-btn" data-action="edit-visit" data-id="${v.id}">${ICON.edit(15, COLORS.slate)}</button>
+          <button class="icon-btn" data-action="delete-visit" data-id="${v.id}">${ICON.trash(15, COLORS.slate)}</button>
+        </div>
       </div>
       ${equipRow(v)}
+      ${v.notes ? `<p class="notes-line">${esc(v.notes)}</p>` : ""}
       <div class="card-footer">
         <div class="date-inline">${ICON.calendar(12, COLORS.slate)}${fmtDate(v.date)}</div>
         <button data-action="toggle-visit" data-id="${v.id}">${statusPill(v.status, v.status === "Completed" ? COLORS.teal : COLORS.brass)}</button>
@@ -196,7 +201,10 @@ function renderClients() {
     <div class="card">
       <div class="card-row">
         <p class="card-title">${esc(c.name)}</p>
-        <button class="icon-btn" data-action="delete-client" data-id="${c.id}">${ICON.trash(15, COLORS.slate)}</button>
+        <div style="display:flex;gap:10px">
+          <button class="icon-btn" data-action="edit-client" data-id="${c.id}">${ICON.edit(15, COLORS.slate)}</button>
+          <button class="icon-btn" data-action="delete-client" data-id="${c.id}">${ICON.trash(15, COLORS.slate)}</button>
+        </div>
       </div>
       <div style="display:flex;gap:6px;margin-top:6px">
         ${statusPill(c.status, STATUS_COLOR[c.status])}
@@ -217,7 +225,10 @@ function renderReviews() {
     <div class="card">
       <div class="card-row">
         <div><p class="card-title">${esc(r.clientName)}</p>${starsHTML(r.rating)}</div>
-        <button class="icon-btn" data-action="delete-review" data-id="${r.id}">${ICON.trash(15, COLORS.slate)}</button>
+        <div style="display:flex;gap:10px">
+          <button class="icon-btn" data-action="edit-review" data-id="${r.id}">${ICON.edit(15, COLORS.slate)}</button>
+          <button class="icon-btn" data-action="delete-review" data-id="${r.id}">${ICON.trash(15, COLORS.slate)}</button>
+        </div>
       </div>
       ${r.comment ? `<p class="notes-line">${esc(r.comment)}</p>` : ""}
       <span class="date-inline" style="margin-top:6px">${fmtDate(r.date)}</span>
@@ -239,6 +250,12 @@ function wireRowActions() {
     el.onclick = () => { data.clients = data.clients.filter((c) => c.id !== el.dataset.id); saveData(); render(); });
   document.querySelectorAll('[data-action="delete-review"]').forEach((el) =>
     el.onclick = () => { data.reviews = data.reviews.filter((r) => r.id !== el.dataset.id); saveData(); render(); });
+  document.querySelectorAll('[data-action="edit-visit"]').forEach((el) =>
+    el.onclick = () => openSheet("visit", data.visits.find((v) => v.id === el.dataset.id)));
+  document.querySelectorAll('[data-action="edit-client"]').forEach((el) =>
+    el.onclick = () => openSheet("client", data.clients.find((c) => c.id === el.dataset.id)));
+  document.querySelectorAll('[data-action="edit-review"]').forEach((el) =>
+    el.onclick = () => openSheet("review", data.reviews.find((r) => r.id === el.dataset.id)));
 
   const qaVisit = document.getElementById("qa-visit");
   const qaClient = document.getElementById("qa-client");
@@ -247,15 +264,15 @@ function wireRowActions() {
 }
 
 /* ---------- sheets (add forms) ---------- */
-function openSheet(kind) {
+function openSheet(kind, existing = null) {
   const container = document.getElementById("sheet-container");
   container.classList.remove("hidden");
-  container.innerHTML = kind === "visit" ? visitSheetHTML() : kind === "client" ? clientSheetHTML() : reviewSheetHTML();
+  container.innerHTML = kind === "visit" ? visitSheetHTML(existing) : kind === "client" ? clientSheetHTML(existing) : reviewSheetHTML(existing);
   container.onclick = (e) => { if (e.target === container) closeSheet(); };
   document.getElementById("sheet-close").onclick = closeSheet;
-  if (kind === "visit") wireVisitSheet();
-  if (kind === "client") wireClientSheet();
-  if (kind === "review") wireReviewSheet();
+  if (kind === "visit") wireVisitSheet(existing);
+  if (kind === "client") wireClientSheet(existing);
+  if (kind === "review") wireReviewSheet(existing);
 }
 function closeSheet() {
   const container = document.getElementById("sheet-container");
@@ -271,32 +288,33 @@ function sheetShell(title, bodyHTML) {
   </div>`;
 }
 
-function visitSheetHTML() {
-  return sheetShell("New Site Visit", `
-    <div class="field"><label>Client name</label><input type="text" id="f-client" placeholder="e.g. Bluebeard's Beach Club" /></div>
+function visitSheetHTML(existing) {
+  const v = existing || {};
+  return sheetShell(existing ? "Edit Site Visit" : "New Site Visit", `
+    <div class="field"><label>Client name</label><input type="text" id="f-client" placeholder="e.g. Bluebeard's Beach Club" value="${esc(v.clientName || "")}" /></div>
     <div class="field"><label>Service requested</label>
-      <select id="f-service">${SERVICES.map((s) => `<option>${esc(s)}</option>`).join("")}</select>
+      <select id="f-service">${SERVICES.map((s) => `<option ${s === v.service ? "selected" : ""}>${esc(s)}</option>`).join("")}</select>
     </div>
     <div class="equip-grid">
-      <div class="equip-input">${ICON.camera(14, COLORS.slate)}<input type="number" min="0" id="f-cameras" value="0" /></div>
-      <div class="equip-input">${ICON.wifi(14, COLORS.slate)}<input type="number" min="0" id="f-aps" value="0" /></div>
-      <div class="equip-input">${ICON.network(14, COLORS.slate)}<input type="number" min="0" id="f-switches" value="0" /></div>
-      <div class="equip-input">${ICON.router(14, COLORS.slate)}<input type="number" min="0" id="f-routers" value="0" /></div>
+      <div class="equip-input">${ICON.camera(14, COLORS.slate)}<input type="number" min="0" id="f-cameras" value="${v.cameras || 0}" /></div>
+      <div class="equip-input">${ICON.wifi(14, COLORS.slate)}<input type="number" min="0" id="f-aps" value="${v.accessPoints || 0}" /></div>
+      <div class="equip-input">${ICON.network(14, COLORS.slate)}<input type="number" min="0" id="f-switches" value="${v.switches || 0}" /></div>
+      <div class="equip-input">${ICON.router(14, COLORS.slate)}<input type="number" min="0" id="f-routers" value="${v.routers || 0}" /></div>
     </div>
-    <div class="field"><label>Visit date</label><input type="date" id="f-date" value="${todayISO()}" /></div>
+    <div class="field"><label>Visit date</label><input type="date" id="f-date" value="${v.date || todayISO()}" /></div>
     <div class="field"><label>Status</label>
       <div class="segmented" id="f-status">
-        <button class="active" data-val="Scheduled">Scheduled</button>
-        <button data-val="Completed">Completed</button>
+        <button class="${(v.status || "Scheduled") === "Scheduled" ? "active" : ""}" data-val="Scheduled">Scheduled</button>
+        <button class="${v.status === "Completed" ? "active" : ""}" data-val="Completed">Completed</button>
       </div>
     </div>
-    <div class="field"><label>Notes</label><textarea id="f-notes" rows="3" placeholder="Site conditions, cabling runs, follow-ups…"></textarea></div>
-    <button class="save-btn" id="f-save" disabled>${ICON.check(16,"#fff")} Save visit</button>
+    <div class="field"><label>Notes</label><textarea id="f-notes" rows="3" placeholder="Site conditions, cabling runs, follow-ups…">${esc(v.notes || "")}</textarea></div>
+    <button class="save-btn" id="f-save" ${v.clientName ? "" : "disabled"}>${ICON.check(16,"#fff")} ${existing ? "Save changes" : "Save visit"}</button>
   `);
 }
 
-function wireVisitSheet() {
-  let status = "Scheduled";
+function wireVisitSheet(existing) {
+  let status = existing?.status || "Scheduled";
   const clientInput = document.getElementById("f-client");
   const saveBtn = document.getElementById("f-save");
   clientInput.oninput = () => { saveBtn.disabled = clientInput.value.trim().length === 0; };
@@ -305,8 +323,7 @@ function wireVisitSheet() {
     document.querySelectorAll("#f-status button").forEach((x) => x.classList.toggle("active", x === b));
   });
   saveBtn.onclick = () => {
-    data.visits.unshift({
-      id: uid(),
+    const fields = {
       clientName: clientInput.value.trim(),
       service: document.getElementById("f-service").value,
       cameras: parseInt(document.getElementById("f-cameras").value || "0", 10),
@@ -316,37 +333,44 @@ function wireVisitSheet() {
       date: document.getElementById("f-date").value || todayISO(),
       status,
       notes: document.getElementById("f-notes").value.trim(),
-    });
+    };
+    if (existing) {
+      const idx = data.visits.findIndex((x) => x.id === existing.id);
+      data.visits[idx] = { ...existing, ...fields };
+    } else {
+      data.visits.unshift({ id: uid(), ...fields });
+    }
     saveData(); closeSheet(); render();
   };
 }
 
-function clientSheetHTML() {
-  return sheetShell("New Client", `
-    <div class="field"><label>Client name</label><input type="text" id="f-name" placeholder="Business name" /></div>
+function clientSheetHTML(existing) {
+  const c = existing || {};
+  return sheetShell(existing ? "Edit Client" : "New Client", `
+    <div class="field"><label>Client name</label><input type="text" id="f-name" placeholder="Business name" value="${esc(c.name || "")}" /></div>
     <div class="field"><label>Status</label>
       <div class="segmented" id="f-cstatus">
-        <button class="active" data-val="Lead">Lead</button>
-        <button data-val="Prospect">Prospect</button>
-        <button data-val="Active">Active</button>
+        <button class="${(c.status || "Lead") === "Lead" ? "active" : ""}" data-val="Lead">Lead</button>
+        <button class="${c.status === "Prospect" ? "active" : ""}" data-val="Prospect">Prospect</button>
+        <button class="${c.status === "Active" ? "active" : ""}" data-val="Active">Active</button>
       </div>
     </div>
     <div class="field"><label>Service tier</label>
       <div class="segmented" id="f-tier">
-        <button data-val="Bronze">Bronze</button>
-        <button data-val="Silver">Silver</button>
-        <button data-val="Gold">Gold</button>
+        <button class="${c.tier === "Bronze" ? "active" : ""}" data-val="Bronze">Bronze</button>
+        <button class="${c.tier === "Silver" ? "active" : ""}" data-val="Silver">Silver</button>
+        <button class="${c.tier === "Gold" ? "active" : ""}" data-val="Gold">Gold</button>
       </div>
     </div>
-    <div class="field"><label>Last contact</label><input type="date" id="f-lastcontact" value="${todayISO()}" /></div>
-    <div class="field"><label>Notes</label><textarea id="f-cnotes" rows="3" placeholder="Context, decision-maker, property size…"></textarea></div>
-    <button class="save-btn" id="f-csave" disabled>${ICON.check(16,"#fff")} Save client</button>
+    <div class="field"><label>Last contact</label><input type="date" id="f-lastcontact" value="${c.lastContact || todayISO()}" /></div>
+    <div class="field"><label>Notes</label><textarea id="f-cnotes" rows="3" placeholder="Context, decision-maker, property size…">${esc(c.notes || "")}</textarea></div>
+    <button class="save-btn" id="f-csave" ${c.name ? "" : "disabled"}>${ICON.check(16,"#fff")} ${existing ? "Save changes" : "Save client"}</button>
   `);
 }
 
-function wireClientSheet() {
-  let status = "Lead";
-  let tier = "";
+function wireClientSheet(existing) {
+  let status = existing?.status || "Lead";
+  let tier = existing?.tier || "";
   const nameInput = document.getElementById("f-name");
   const saveBtn = document.getElementById("f-csave");
   nameInput.oninput = () => { saveBtn.disabled = nameInput.value.trim().length === 0; };
@@ -359,34 +383,41 @@ function wireClientSheet() {
     document.querySelectorAll("#f-tier button").forEach((x) => x.classList.toggle("active", x.dataset.val === tier));
   });
   saveBtn.onclick = () => {
-    data.clients.unshift({
-      id: uid(),
+    const fields = {
       name: nameInput.value.trim(),
       status,
       tier: tier || null,
       lastContact: document.getElementById("f-lastcontact").value || todayISO(),
       notes: document.getElementById("f-cnotes").value.trim(),
-    });
+    };
+    if (existing) {
+      const idx = data.clients.findIndex((x) => x.id === existing.id);
+      data.clients[idx] = { ...existing, ...fields };
+    } else {
+      data.clients.unshift({ id: uid(), ...fields });
+    }
     saveData(); closeSheet(); render();
   };
 }
 
-function reviewSheetHTML() {
-  return sheetShell("New Review", `
-    <div class="field"><label>Client name</label><input type="text" id="f-rclient" placeholder="Who left the review?" /></div>
+function reviewSheetHTML(existing) {
+  const r = existing || {};
+  const initialRating = r.rating || 5;
+  return sheetShell(existing ? "Edit Review" : "New Review", `
+    <div class="field"><label>Client name</label><input type="text" id="f-rclient" placeholder="Who left the review?" value="${esc(r.clientName || "")}" /></div>
     <div class="field"><label>Rating</label>
       <div class="star-picker" id="f-rating">
-        ${[1,2,3,4,5].map((i) => `<button data-val="${i}">${ICON.star(26, COLORS.brass, i <= 5)}</button>`).join("")}
+        ${[1,2,3,4,5].map((i) => `<button data-val="${i}">${ICON.star(26, COLORS.brass, i <= initialRating)}</button>`).join("")}
       </div>
     </div>
-    <div class="field"><label>Comment</label><textarea id="f-rcomment" rows="3" placeholder="What did they say?"></textarea></div>
-    <div class="field"><label>Date</label><input type="date" id="f-rdate" value="${todayISO()}" /></div>
-    <button class="save-btn" id="f-rsave" disabled>${ICON.check(16,"#fff")} Save review</button>
+    <div class="field"><label>Comment</label><textarea id="f-rcomment" rows="3" placeholder="What did they say?">${esc(r.comment || "")}</textarea></div>
+    <div class="field"><label>Date</label><input type="date" id="f-rdate" value="${r.date || todayISO()}" /></div>
+    <button class="save-btn" id="f-rsave" ${r.clientName ? "" : "disabled"}>${ICON.check(16,"#fff")} ${existing ? "Save changes" : "Save review"}</button>
   `);
 }
 
-function wireReviewSheet() {
-  let rating = 5;
+function wireReviewSheet(existing) {
+  let rating = existing?.rating || 5;
   const clientInput = document.getElementById("f-rclient");
   const saveBtn = document.getElementById("f-rsave");
   const starBtns = document.querySelectorAll("#f-rating button");
@@ -395,13 +426,18 @@ function wireReviewSheet() {
   starBtns.forEach((b, i) => b.onclick = () => { rating = i + 1; paintStars(); });
   clientInput.oninput = () => { saveBtn.disabled = clientInput.value.trim().length === 0; };
   saveBtn.onclick = () => {
-    data.reviews.unshift({
-      id: uid(),
+    const fields = {
       clientName: clientInput.value.trim(),
       rating,
       comment: document.getElementById("f-rcomment").value.trim(),
       date: document.getElementById("f-rdate").value || todayISO(),
-    });
+    };
+    if (existing) {
+      const idx = data.reviews.findIndex((x) => x.id === existing.id);
+      data.reviews[idx] = { ...existing, ...fields };
+    } else {
+      data.reviews.unshift({ id: uid(), ...fields });
+    }
     saveData(); closeSheet(); render();
   };
 }
